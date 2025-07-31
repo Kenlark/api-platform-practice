@@ -12,6 +12,7 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post as ApiPost;
+use Symfony\Component\Validator\Constraints\Length;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 #[ApiResource(
@@ -34,11 +35,13 @@ class Post
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:collection', 'write:post', 'read:item', 'write:Post'])]
+    #[Groups(['read:collection', 'write:post', 'read:item', 'write:Post']),
+    Length(min: 3, max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['read:collection', 'write:post', 'read:item', 'write:Post'])]
+    #[Groups(['read:collection', 'write:post', 'read:item', 'write:Post']),
+    Length(min: 3, max: 255)]
     private ?string $slug = null;
 
     #[ORM\Column(type: Types::TEXT)]
