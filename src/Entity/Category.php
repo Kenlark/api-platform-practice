@@ -11,17 +11,20 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints\Length;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
-#[ApiResource()]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read:Category']],
+    denormalizationContext: ['groups' => ['write:Category']],
+)]
 class Category
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('read:Post')]
+    #[Groups(['read:Post', 'read:Category'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('read:Post'),
+    #[Groups(['read:Post', 'write:Category']),
     Length(min: 3, max: 255)]
     private ?string $name = null;
 
@@ -29,6 +32,7 @@ class Category
      * @var Collection<int, Post>
      */
     #[ORM\OneToMany(targetEntity: Post::class, mappedBy: 'category')]
+    #[Groups('read:Category')]
     private Collection $posts;
 
     public function __construct()
