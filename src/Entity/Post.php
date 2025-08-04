@@ -4,18 +4,19 @@ namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post as ApiPost;
+use App\Controller\PostPublishController;
 use App\Repository\PostRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Attribute\Groups;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post as ApiPost;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Length;
 
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
@@ -26,10 +27,15 @@ use Symfony\Component\Validator\Constraints as Assert;
         new ApiPost(denormalizationContext: ['groups' => ['write:post']]),
         new Patch(denormalizationContext: ['groups' => ['write:Post']]),
         new Delete(normalizationContext: ['groups' => ['read:item', 'read:Post']]),
+        new ApiPost(
+            uriTemplate: '/posts/{id}/publish',
+            controller: PostPublishController::class,
+            denormalizationContext: ['groups' => ['write:post']]
+        ),
     ],
         paginationItemsPerPage: 1, // par défaut un élement par page
         paginationMaximumItemsPerPage: 2, // maximum deux éléments par page
-        paginationClientItemsPerPage: true // permet au client de spécifier le nombre d'éléments par page
+        paginationClientItemsPerPage: true, // permet au client de spécifier le nombre d'éléments par page
 ),
 ApiFilter(searchFilter::class, properties: ['id' => 'exact', 'title' => 'partial']),]
 
@@ -68,6 +74,10 @@ class Post
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[Groups(["read:item", "write:Post", "write:post"])]
     private ?Category $category = null;
+
+    #[ORM\Column(type:"boolean", options: ["default" => false])]
+    #[Groups(['read:collection'])]
+    private ?bool $online = false;
 
     public function __construct() {
         $this->createdAt = new \DateTimeImmutable();
@@ -147,6 +157,18 @@ class Post
     public function setCategory(?Category $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function isOnline(): ?bool
+    {
+        return $this->online;
+    }
+
+    public function setOnline(bool $online): static
+    {
+        $this->online = $online;
 
         return $this;
     }
