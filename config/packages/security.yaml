@@ -13,20 +13,26 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
-            lazy: true
+
+        login:
+            pattern: ^/api/login$
+            stateless: true
             provider: app_user_provider
-            stateless: false
             json_login:
                 check_path: /api/login
-            logout:
-                path: app_logout
-            custom_authenticator: App\Security\AppAuthenticator
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+        main:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
 
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
                 path: /
+
                 # by default, the feature is enabled by checking a checkbox in the
                 # login form, uncomment the following line to always enable it.
                 #always_remember_me: true
