@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
 use App\Repository\PostRepository;
@@ -24,8 +26,12 @@ use Symfony\Component\Validator\Constraints as Assert;
         new ApiPost(denormalizationContext: ['groups' => ['write:post']]),
         new Patch(denormalizationContext: ['groups' => ['write:Post']]),
         new Delete(normalizationContext: ['groups' => ['read:item', 'read:Post']]),
-    ]
-)]
+    ],
+        paginationItemsPerPage: 1, // par défaut un élement par page
+        paginationMaximumItemsPerPage: 2, // maximum deux éléments par page
+        paginationClientItemsPerPage: true // permet au client de spécifier le nombre d'éléments par page
+),
+ApiFilter(searchFilter::class, properties: ['id' => 'exact', 'title' => 'partial']),]
 
 
 class Post
